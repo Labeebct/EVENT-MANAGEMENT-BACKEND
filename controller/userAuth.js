@@ -73,3 +73,35 @@ exports.postSignup = async (req, res) => {
         res.status(500).send('Internal server error',error)
     }
 }
+
+exports.postOtpverification = async(req,res) => {
+    try {
+        //Collecting email to find the user to verify
+        const email = req.params.email
+        
+        //Destructuring otp values from body
+        const {otpValue} = req.body
+     
+        //Validating otp
+        if(otpValue.length == 0 || otpValue.length < 4){
+            return res.status(422).json({msg:'Please provide otp'})
+        }
+
+        //Checking whether user otp matches with created otp
+        if(otpValue != signupOTP){
+            return res.status(409).json({msg:'Invalid OTP'})
+        }
+        else{
+            //Verifying user if otp matches
+            const veryfyUser = await signupModel.findOneAndUpdate({email},{$set:{verified:true}},{new: true})
+
+            //Making sure whether verification success or not
+            if(veryfyUser.verified) return res.status(200).json({msg:'Verification success'})
+            else return res.status(403).json({msg:'Verification Failed'})
+        }
+        
+    } catch (error) {
+        console.log('Error in post otp verification',error);
+        res.status(500).send('Internal Server error')
+    }
+}

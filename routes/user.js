@@ -10,6 +10,8 @@ const userAuth = require('../controller/userAuth')
 
 //USER AUTHENTICATION
 router.post('/signup',userAuth.postSignup)
+router.post('/otp-verification/:email',userAuth.postOtpverification)
+
 
 
 
