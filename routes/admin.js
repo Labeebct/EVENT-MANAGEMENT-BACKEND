@@ -9,9 +9,7 @@ const verifyToken = require('../middleware/verifyTokens')
 const upload = require('../middleware/multer')
 
 //ADMIN AUTHENTICATION
-router.post('/signup',adminAuth.postSignup)
-router.post('/login',adminAuth.postLogin)
-
-
+router.post('/signup', adminAuth.postSignup)
+router.post('/login', adminAuth.postLogin)
 
 module.exports = router  
