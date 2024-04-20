@@ -11,5 +11,7 @@ const upload = require('../middleware/multer')
 //ADMIN AUTHENTICATION
 router.post('/signup', adminAuth.postSignup)
 router.post('/login', adminAuth.postLogin)
+router.post('/forget-password', adminAuth.postForgetPassword)
+router.post('/reset-password', adminAuth.postResetPassword)
 
 module.exports = router  

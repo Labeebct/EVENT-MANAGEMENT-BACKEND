@@ -1,19 +1,14 @@
 const bcrypt = require('bcrypt')
-const otpGenerator = require('../utils/otpGenarator')
 const jwt = require('jsonwebtoken');
 
 const signupModel = require('../models/adminSignup')
-const { signupEmailOtp, forgetPassEmail } = require('../utils/emailVerify')
 const adminSecretKey = process.env.ADMIN_SECRET
-
-let signupOTP;
-let forgetPassOtp;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 exports.postSignup = async (req, res) => {
     try {
 
         //Regex to Validate
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
         //Destructuring datas from body
@@ -68,7 +63,6 @@ exports.postLogin = async (req, res) => {
     try {
 
         //Regex for validating entering datas
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const passwordRegex = /.{8,}/
 
         //Destructuring  login datas
@@ -118,5 +112,96 @@ exports.postLogin = async (req, res) => {
     } catch (error) {
         console.log('Error in post login', error);
         res.status(500).send('Internal server error')
+    }
+}
+
+exports.postForgetPassword = async (req, res) => {
+    try {
+
+        //Destructuring email and secret key from req.body
+        const { email, secretkey } = req.body
+
+        //Validating admin datas
+        if (!email && !secretkey) res.status(422).json({ msg: 'Please fill all fields' })
+        else if (!email) res.status(422).json({ msg: 'Please enter email' })
+        else if (!emailRegex.test(email)) res.status(422).json({ msg: 'Incorrect email format' })
+        else if (!secretkey) res.status(422).json({ msg: 'Please enter secretkey' })
+        else {
+            //Checking whether admin exist or not
+            const adminExist = await signupModel.findOne({ email })
+            if (adminExist) {
+
+                //Checking secret key matcning or not
+                if (secretkey == adminSecretKey) {
+                    return res.status(200).json({ msg: 'Redirecting to password reset',email })
+                } else {
+                    return res.status(401).json({ msg: 'Incorrect secretkey' })
+                }
+
+            } else {
+                return res.status(404).json({ msg: 'Admin with email not exist' })
+            }
+        }
+
+    } catch (error) {
+        console.log('Error in post forget password', error);
+        res.status(500).send('Internal server error', error)
+    }
+}
+
+exports.postResetPassword = async (req, res) => {
+    try {
+
+        const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+        //Destructuring passwords from body
+        const { oldPassword, newPassword, confirmPassword } = req.body
+
+        //Collecting email to find the user to reset the password
+        const email = req.query.email
+
+        //Validating Password
+        if (!oldPassword || !newPassword || !confirmPassword) {
+            return res.status(422).json({ msg: 'Please fill all Fields' })
+        } else if (!passwordRegex.test(newPassword)) {
+            return res.status(422).json({ msg: 'Password should be 8+ chars, 1 uppercase, 1 digit, 1 special character' })
+        } else if (newPassword != confirmPassword) {
+            return res.status(422).json({ msg: 'New password and confirm password mismatch' })
+        }
+
+        //Finding user with email
+        const findUser = await signupModel.findOne({ email })
+
+        if (findUser) {
+            //Taking userold password to compare password
+            const userOldPassword = findUser.password
+
+            //Comparing password
+            const passwordMatch = await bcrypt.compare(oldPassword, userOldPassword)
+            if (passwordMatch) {
+                //Salting and Hashing password
+                const salt = await bcrypt.genSalt(10)
+                const newHashedPassword = await bcrypt.hash(newPassword, salt)
+
+                //Checking whether old password and new password are same
+                const samePassword = await bcrypt.compare(newPassword, userOldPassword)
+                if (samePassword) {
+                    return res.status(409).json({ msg: 'Old password cannot be the same as the new password' })
+                } else {
+
+                    //Upating new password in the database
+                    await signupModel.findOneAndUpdate({ email }, { $set: { password: newHashedPassword } }, { new: true })
+                    return res.status(200).json({ msg: 'Password reset success' })
+                }
+            } else {
+                return res.status(401).json({ msg: 'Incorrect old password' })
+            }
+        } else {
+            //Passing 404 when user not exist
+            return res.status(404).json({ msg: 'No user found with provided email' })
+        }
+
+    } catch (error) {
+        console.log('Error in post reset password', error);
     }
 }
