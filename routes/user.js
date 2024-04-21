@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const commonController = require('../controller/common')
 const verifyToken = require('../middleware/verifyTokens')
 
 //Multer configuration
@@ -16,5 +17,6 @@ router.post('/forget-password', userAuth.postForgetpassword)
 router.post('/forget-otp-verification/:email', userAuth.postForgetPasswordOtp)
 router.post('/reset-password', userAuth.postResetPassword)
 router.get('/resend-otp', userAuth.getResendOtp)
+router.post('/complete-profile',upload.single('profile'),commonController.postCompleteProfile)
 
 module.exports = router;

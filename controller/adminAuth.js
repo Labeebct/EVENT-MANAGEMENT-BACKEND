@@ -111,7 +111,7 @@ exports.postLogin = async (req, res) => {
 
     } catch (error) {
         console.log('Error in post login', error);
-        res.status(500).send('Internal server error')
+        res.status(500).json({msg:'Internal server error',error})
     }
 }
 
@@ -145,7 +145,7 @@ exports.postForgetPassword = async (req, res) => {
 
     } catch (error) {
         console.log('Error in post forget password', error);
-        res.status(500).send('Internal server error', error)
+        res.status(500).json({msg:'Internal server error',error})
     }
 }
 
@@ -203,5 +203,6 @@ exports.postResetPassword = async (req, res) => {
 
     } catch (error) {
         console.log('Error in post reset password', error);
+        res.status(500).json({msg:'Internal server error',error})
     }
 }

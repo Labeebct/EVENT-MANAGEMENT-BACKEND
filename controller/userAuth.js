@@ -70,7 +70,7 @@ exports.postSignup = async (req, res) => {
         }
     } catch (error) {
         console.log('Error in post signup', error);
-        res.status(500).send('Internal server error', error)
+        res.status(500).json({msg:'Internal server error',error})
     }
 }
 
@@ -102,7 +102,7 @@ exports.postOtpverification = async (req, res) => {
 
     } catch (error) {
         console.log('Error in post otp verification', error);
-        res.status(500).send('Internal Server error')
+        res.status(500).json({msg:'Internal server error',error})
     }
 }
 
@@ -172,7 +172,7 @@ exports.postLogin = async (req, res) => {
 
     } catch (error) {
         console.log('Error in post login', error);
-        res.status(500).send('Internal server error')
+        res.status(500).json({msg:'Internal server error',error})
     }
 }
 
@@ -200,7 +200,7 @@ exports.postForgetpassword = async (req, res) => {
 
     } catch (error) {
         console.log('Error in post forget password', error);
-        res.status(500).send('Internal server error')
+        res.status(500).json({msg:'Internal server error',error})
     }
 }
 
@@ -228,7 +228,7 @@ exports.postForgetPasswordOtp = async (req, res) => {
 
     } catch (error) {
         console.log('Error in post otp verification otp');
-        res.status(500).send('Internal server Error')
+        res.status(500).json({msg:'Internal server error',error})
     }
 }
 
@@ -285,7 +285,7 @@ exports.postResetPassword = async (req, res) => {
         }
 
     } catch (error) {
-        console.log('Error in post reset password', error);
+        res.status(500).json({msg:'Internal server error',error})
     }
 }
 
@@ -308,6 +308,7 @@ exports.getResendOtp = async (req, res) => {
 
     } catch (error) {
         console.log('Error in get ResendOtp', error);
+        res.status(500).json({msg:'Internal server error',error})
     }
 }
 
