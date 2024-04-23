@@ -15,6 +15,10 @@ const profileSchemaObj = new Schema({
         required: true,
         type: String
     },
+    email: {
+        required: true,
+        type: String
+    },
     fullname: {
         required: true,
         type: String
@@ -29,7 +33,7 @@ const profileSchemaObj = new Schema({
     },
     dob: {
         required: true,
-        type: Number
+        type: String
     },
     gender: {
         required: true,

@@ -16,7 +16,7 @@ exports.postSignup = async (req, res) => {
         const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
         //Destructuring datas from body
-        const { username, email, password, confirmpassword } = req.body
+        const { username, email, password, confirmpassword , role } = req.body
 
         //Validating user datas
         if (!username, !email, !password, !confirmpassword) {
@@ -42,12 +42,13 @@ exports.postSignup = async (req, res) => {
             //Calling OTP function to get random otp each type
             signupOTP = otpGenerator()
 
-            if (userExist) {
+            if (userExist
+            ) {
 
                 //Checking whether user verified or not
                 if (userExist.verified) return res.status(409).json({ msg: 'User already Exist', userExist: true })
                 else {
-
+ 
                     //Telling the user that this is a unverified account and login to verify email with otp
                     return res.status(401).json({ msg: 'Account exist with this email Login to Verify', userVerified: false })
                 }

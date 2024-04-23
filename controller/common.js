@@ -8,9 +8,13 @@ exports.postCompleteProfile = async (req, res) => {
 
         //Destructuring email to find the user
         const { email } = req.query
-        const { role } = req.body
+        const { role  } = req.body
         if (!req.file) return res.status(422).json({ msg: 'Please provide a profile picture' })
-        const imagePath = '/images/profile/' + req.file.filename
+        const imagePath = '/images/profile/' + req.file.filename        
+
+        //Checking whether profile exist for member 
+        const profileExist = await profileModel.findOne({email})
+        if(profileExist && profileExist.role === role) return res.status(200).json({msg:'Profile already saved'})
 
         //Function to pass error
         const errFunction = (statusCode, msg) => {
@@ -55,7 +59,7 @@ exports.postCompleteProfile = async (req, res) => {
 
         //Overriding profile to the image path which is created from req.file
         req.body.profile = imagePath
-
+        req.body.email = email
         //Deleting frontent profile url
         delete req.body.profileUrl
 
