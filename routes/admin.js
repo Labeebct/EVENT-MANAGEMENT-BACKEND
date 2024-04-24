@@ -17,6 +17,6 @@ router.post('/reset-password', adminAuth.postResetPassword)
 router.post('/complete-profile',upload.single('profile'),commonController.postCompleteProfile)
 router.get('/users',adminController.getUsersList)
 router.get('/agents',adminController.getAgentsList)
-router.put('/block',adminController.getAgentsList)
+router.put('/block',adminController.postBlockUserAgent)
 
 module.exports = router  

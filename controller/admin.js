@@ -61,3 +61,27 @@ exports.getAgentsList = async (req, res) => {
         res.status(500).json({ msg: 'Internal server error', error })
     }
 }
+
+exports.postBlockUserAgent = async(req,res) => {
+    try {
+
+        //Destructuring id from req query
+        const {id} = req.query
+        //Finding the member to check the current status of the member
+        const findMember = await signupModel.findById(id)
+
+        //Sending 404 if no user found
+        if(!findMember) return res.status(404).json({msg:'No user found'})
+
+        //Setting newstatus according to the old status
+        const newStatus = findMember.status == 'active' ? 'blocked' : 'active'
+        const blockMember = await signupModel.findByIdAndUpdate(id,{$set:{status:newStatus}},{new:true})
+
+        if (blockMember.status == newStatus) return res.status(200).json({msg:'Status updated success'})
+        else return res.status(404).json({msg:'Block status failed'})
+        
+    } catch (error) {
+        console.log('Error in post block user and agent',error);
+        res.status(500).json({msg:'Internal server error',error})
+    }
+} 
