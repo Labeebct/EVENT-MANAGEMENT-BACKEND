@@ -1,25 +1,29 @@
 const signupModel = require('../models/signup')
 const adminSignupModel = require('../models/adminSignup')
 const profileModel = require('../models/profile')
+const messageModel = require('../models/messages')
 const { Types, default: mongoose } = require('mongoose')
+
+//Function to pass error
+const errFunction = (statusCode, msg) => {
+    return res.status(statusCode).json({ msg })
+}
+
+//Regex to Validate
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 exports.postCompleteProfile = async (req, res) => {
     try {
 
         //Destructuring email to find the user
         const { email } = req.query
-        const { role  } = req.body
+        const { role } = req.body
         if (!req.file) return res.status(422).json({ msg: 'Please provide a profile picture' })
-        const imagePath = '/images/profile/' + req.file.filename        
+        const imagePath = 'images/profile/' + req.file.filename
 
         //Checking whether profile exist for member 
-        const profileExist = await profileModel.findOne({email})
-        if(profileExist && profileExist.role === role) return res.status(200).json({msg:'Profile already saved'})
-
-        //Function to pass error
-        const errFunction = (statusCode, msg) => {
-            return res.status(statusCode).json({ msg })
-        }
+        const profileExist = await profileModel.findOne({ email })
+        if (profileExist && profileExist.role === role) return res.status(200).json({ msg: 'Profile already saved' })
 
         //creating validating messages
         const validationMsg = {
@@ -68,6 +72,25 @@ exports.postCompleteProfile = async (req, res) => {
 
     } catch (error) {
         console.log('Error in post complete profile', error);
+        res.status(500).json({ msg: 'Internal server error', error })
+    }
+}
+
+exports.postContactus = (req, res) => {
+    try {
+
+        //Destructuring datas from req.body
+        const { username, email, message, subject ,role } = req.body
+
+        // Validating user input datas
+        if (username.trim() === '' || email.trim() === '' || message.trim() === '' || subject.trim() === '') errFunction(402, 'Please fill all fields')
+        else if (!emailRegex.test(email)) errFunction(422, 'Invalid email format')
+
+        messageModel.create(req.body)
+        res.status(200).json({ msg: 'Message has been sended we will reach you in short' })
+
+    } catch (error) {
+        console.log("Error in post message", error);
         res.status(500).json({ msg: 'Internal server error', error })
     }
 }
