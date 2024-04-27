@@ -18,5 +18,7 @@ router.post('/complete-profile',upload.single('profile'),commonController.postCo
 router.get('/users',adminController.getUsersList)
 router.get('/agents',adminController.getAgentsList)
 router.put('/block',adminController.postBlockUserAgent)
+router.get('/messages',adminController.getMessages)
+router.delete('/remove-message',adminController.deleteMessages)
 
 module.exports = router  

@@ -87,7 +87,7 @@ exports.postContactus = (req, res) => {
         else if (!emailRegex.test(email)) errFunction(422, 'Invalid email format')
 
         messageModel.create(req.body)
-        res.status(200).json({ msg: 'Message has been sended we will reach you in short' })
+        res.status(200).json({ msg: 'Message has been sended succesfully.' })
 
     } catch (error) {
         console.log("Error in post message", error);
