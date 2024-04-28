@@ -178,6 +178,6 @@ exports.postAddCategory = async (req, res) => {
 
     } catch (error) {
         console.log('Error in post add category');
-        res.status(500).json({ msg: 'Internal server error', error })
+        res.status(500).json({ msg: 'Internal server error', error }) 
     }
 }
