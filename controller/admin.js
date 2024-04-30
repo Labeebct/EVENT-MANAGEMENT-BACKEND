@@ -134,7 +134,7 @@ exports.getCategory = async (req, res) => {
     }
 }
 
-exports.putBlockCategory = async (req,res) => {
+exports.putBlockCategory = async (req, res) => {
     try {
 
         const { id } = req.query
@@ -178,6 +178,66 @@ exports.postAddCategory = async (req, res) => {
 
     } catch (error) {
         console.log('Error in post add category');
-        res.status(500).json({ msg: 'Internal server error', error }) 
+        res.status(500).json({ msg: 'Internal server error', error })
+    }
+}
+
+exports.posEditCategory = async (req, res) => {
+    try {
+
+        //Desstructuring filename from req.file and creating the image path
+        let imagePath;
+        const { id } = req.query
+        const findCategory = await categoryModel.findById(id)
+
+        if (!req.file) imagePath = findCategory.categoryImage
+        else imagePath = '/images/category/' + req.file.filename
+
+        //Destructuring datas to validate
+        const { categoryName, categoryDiscription } = req.body
+
+        if (categoryName.trim() == '' || categoryDiscription.trim() == '') return res.status(422).json({ msg: 'Please fill all fields' })
+
+        //Inserting the image path to the req.body
+        req.body.categoryImage = imagePath
+        await categoryModel.updateOne({ _id: id }, req.body, { upsert: true })
+        res.status(200).json({ msg: 'Category Edited success' })
+
+
+    } catch (error) {
+        console.log('Error in post add category');
+        res.status(500).json({ msg: 'Internal server error', error })
+    }
+}
+
+exports.getEditCategory = async (req, res) => {
+    try {
+
+        const { id } = req.query
+
+        //Checking whether category exist or not 
+        const category = await categoryModel.findById(id)
+        if (!category) return res.status(404).json({ msg: 'Category is not found' })
+
+        res.status(200).json({ msg: 'Category has been sended to the frontent', category })
+
+
+    } catch (error) {
+        console.log('Error in get edit category', error);
+        res.status(500).json({ msg: 'Internal server error', error })
+    }
+}
+
+exports.postSortMessages = async (req, res) => {
+    try {
+        const { sortValue } = req.body
+
+        //If sortvalue is all finding all messages in the database else finding related to role
+        const messages = sortValue == "all" ? await messageModel.find() : await messageModel.find({ role: sortValue })
+        res.status(200).json({ msg: 'Messages has been send to the frontent', messages })
+
+    } catch (error) {
+        console.log('Error in post sortmessages');
+        res.status(500).json({ msg: 'Internal server error', error })
     }
 }

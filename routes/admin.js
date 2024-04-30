@@ -24,6 +24,9 @@ router.get('/messages',adminController.getMessages)
 router.delete('/remove-message',adminController.deleteMessages)
 router.get('/category',adminController.getCategory)
 router.post('/add-category',upload.single('categoryImage'),adminController.postAddCategory)
+router.post('/edit-category',upload.single('categoryImage'),adminController.posEditCategory)
 router.put('/category-block',adminController.putBlockCategory)
+router.get('/edit-category',adminController.getEditCategory)
+router.post('/sort-messages',adminController.postSortMessages)
 
 module.exports = router      
