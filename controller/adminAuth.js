@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken');
-
+const profileModel = require('../models/profile')
 const signupModel = require('../models/adminSignup')
 const adminSecretKey = process.env.ADMIN_SECRET
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -91,14 +91,18 @@ exports.postLogin = async (req, res) => {
 
             //Sending succuess msg if passord matches
             if (passwordMatch) {
+
                 const payload = {
-                    userId: userExist._id,
-                    username: userExist.username,
+                    adminId: userExist._id,
+                    adminName: userExist.username,
                     role: 'admin'
                 }
                 const token = jwt.sign(payload, process.env.JWT_SECRET);
+
+                const profileExist = await profileModel.findOne({ email })
+                if (!profileExist) return res.status(202).json({ msg: 'Login Success', userExist })
                 res.status(200).json({ msg: 'Login Success', token })
-                //return res.status(200).json({msg:'Login Success'})
+
             } else {
                 return res.status(401).json({ msg: 'Incorrect password' })
             }
@@ -111,7 +115,7 @@ exports.postLogin = async (req, res) => {
 
     } catch (error) {
         console.log('Error in post login', error);
-        res.status(500).json({msg:'Internal server error',error})
+        res.status(500).json({ msg: 'Internal server error', error })
     }
 }
 
@@ -133,7 +137,7 @@ exports.postForgetPassword = async (req, res) => {
 
                 //Checking secret key matcning or not
                 if (secretkey == adminSecretKey) {
-                    return res.status(200).json({ msg: 'Redirecting to password reset',email })
+                    return res.status(200).json({ msg: 'Redirecting to password reset', email })
                 } else {
                     return res.status(401).json({ msg: 'Incorrect secretkey' })
                 }
@@ -145,7 +149,7 @@ exports.postForgetPassword = async (req, res) => {
 
     } catch (error) {
         console.log('Error in post forget password', error);
-        res.status(500).json({msg:'Internal server error',error})
+        res.status(500).json({ msg: 'Internal server error', error })
     }
 }
 
@@ -203,6 +207,6 @@ exports.postResetPassword = async (req, res) => {
 
     } catch (error) {
         console.log('Error in post reset password', error);
-        res.status(500).json({msg:'Internal server error',error})
+        res.status(500).json({ msg: 'Internal server error', error })
     }
 }

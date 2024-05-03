@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt')
 const otpGenerator = require('../utils/otpGenarator')
+const profileModel = require('../models/profile')
 const jwt = require('jsonwebtoken');
-
 const signupModel = require('../models/signup')
 const { signupEmailOtp, forgetPassEmail } = require('../utils/emailVerify')
 
@@ -16,7 +16,7 @@ exports.postSignup = async (req, res) => {
         const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
         //Destructuring datas from body
-        const { username, email, password, confirmpassword , role } = req.body
+        const { username, email, password, confirmpassword, role } = req.body
 
         //Validating user datas
         if (!username, !email, !password, !confirmpassword) {
@@ -48,7 +48,7 @@ exports.postSignup = async (req, res) => {
                 //Checking whether user verified or not
                 if (userExist.verified) return res.status(409).json({ msg: 'User already Exist', userExist: true })
                 else {
- 
+
                     //Telling the user that this is a unverified account and login to verify email with otp
                     return res.status(401).json({ msg: 'Account exist with this email Login to Verify', userVerified: false })
                 }
@@ -71,7 +71,7 @@ exports.postSignup = async (req, res) => {
         }
     } catch (error) {
         console.log('Error in post signup', error);
-        res.status(500).json({msg:'Internal server error',error})
+        res.status(500).json({ msg: 'Internal server error', error })
     }
 }
 
@@ -103,7 +103,7 @@ exports.postOtpverification = async (req, res) => {
 
     } catch (error) {
         console.log('Error in post otp verification', error);
-        res.status(500).json({msg:'Internal server error',error})
+        res.status(500).json({ msg: 'Internal server error', error })
     }
 }
 
@@ -144,14 +144,18 @@ exports.postLogin = async (req, res) => {
 
                     //Sending succuess msg if passord matches
                     if (passwordMatch) {
+
                         const payload = {
                             userId: userExist._id,
                             username: userExist.username,
-                            role: 'user'
+                            role: userExist.role
                         }
                         const token = jwt.sign(payload, process.env.JWT_SECRET);
+
+                        const profileExist = await profileModel.findOne({ email })
+                        if (!profileExist) return res.status(202).json({ msg: 'Login Success', userExist })
                         res.status(200).json({ msg: 'Login Success', token })
-                        //return res.status(200).json({msg:'Login Success'})
+                    
                     } else {
                         return res.status(401).json({ msg: 'Incorrect Password' })
                     }
@@ -173,7 +177,7 @@ exports.postLogin = async (req, res) => {
 
     } catch (error) {
         console.log('Error in post login', error);
-        res.status(500).json({msg:'Internal server error',error})
+        res.status(500).json({ msg: 'Internal server error', error })
     }
 }
 
@@ -201,7 +205,7 @@ exports.postForgetpassword = async (req, res) => {
 
     } catch (error) {
         console.log('Error in post forget password', error);
-        res.status(500).json({msg:'Internal server error',error})
+        res.status(500).json({ msg: 'Internal server error', error })
     }
 }
 
@@ -229,7 +233,7 @@ exports.postForgetPasswordOtp = async (req, res) => {
 
     } catch (error) {
         console.log('Error in post otp verification otp');
-        res.status(500).json({msg:'Internal server error',error})
+        res.status(500).json({ msg: 'Internal server error', error })
     }
 }
 
@@ -286,7 +290,7 @@ exports.postResetPassword = async (req, res) => {
         }
 
     } catch (error) {
-        res.status(500).json({msg:'Internal server error',error})
+        res.status(500).json({ msg: 'Internal server error', error })
     }
 }
 
@@ -309,7 +313,7 @@ exports.getResendOtp = async (req, res) => {
 
     } catch (error) {
         console.log('Error in get ResendOtp', error);
-        res.status(500).json({msg:'Internal server error',error})
+        res.status(500).json({ msg: 'Internal server error', error })
     }
 }
 

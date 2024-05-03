@@ -1,6 +1,7 @@
 const signupModel = require('../models/signup')
 const adminSignupModel = require('../models/adminSignup')
 const profileModel = require('../models/profile')
+const jwt = require('jsonwebtoken');
 const messageModel = require('../models/messages')
 const { Types, default: mongoose } = require('mongoose')
 
@@ -22,7 +23,11 @@ exports.postCompleteProfile = async (req, res) => {
         const imagePath = 'images/profile/' + req.file.filename
 
         //Checking whether profile exist for member 
+        const userExist = await signupModel.findOne({ email })
+        const adminExist = await adminSignupModel.findOne({ email })
+
         const profileExist = await profileModel.findOne({ email })
+
         if (profileExist && profileExist.role === role) return res.status(200).json({ msg: 'Profile already saved' })
 
         //creating validating messages
@@ -46,29 +51,38 @@ exports.postCompleteProfile = async (req, res) => {
             }
         }
 
-        //Inserting id of current member whether its user , admin or agent
+        //Inserting id of current member whether it's user , admin or agent.
+
+        let memberId;
+
         if (role == 'admin') {
             const admin = await adminSignupModel.findOne({ email })
             const adminObjId = new mongoose.Types.ObjectId(admin._id);
-            req.body.adminId = adminObjId
-        } else if (role == 'agent') {
-            const agent = await signupModel.findOne({ email })
-            const agentObjId = new mongoose.Types.ObjectId(agent._id);
-            req.body.agentId = agentObjId
+            memberId = adminObjId
         } else {
-            const user = await signupModel.findOne({ email })
-            const userObjId = new mongoose.Types.ObjectId(user._id);
-            req.body.userId = userObjId
+            const member = await signupModel.findOne({ email })
+            const memberObj = new mongoose.Types.ObjectId(member._id);
+            memberId = memberObj
         }
 
         //Overriding profile to the image path which is created from req.file
+        req.body.memberId = memberId
         req.body.profile = imagePath
         req.body.email = email
+
         //Deleting frontent profile url
         delete req.body.profileUrl
 
         await profileModel.create(req.body)
-        res.status(200).json({ msg: 'Profile saved success' })
+
+        const payload = {
+            userId: userExist ? userExist._id : adminExist._id,
+            username: userExist ? userExist.username : adminExist.username,
+            role: role
+        }
+
+        const token = jwt.sign(payload, process.env.JWT_SECRET);
+        res.status(200).json({ msg: 'Profile saved success', token })
 
     } catch (error) {
         console.log('Error in post complete profile', error);
@@ -80,7 +94,7 @@ exports.postContactus = (req, res) => {
     try {
 
         //Destructuring datas from req.body
-        const { username, email, message, subject ,role } = req.body
+        const { username, email, message, subject, role } = req.body
 
         // Validating user input datas
         if (username.trim() === '' || email.trim() === '' || message.trim() === '' || subject.trim() === '') errFunction(402, 'Please fill all fields')
@@ -91,6 +105,21 @@ exports.postContactus = (req, res) => {
 
     } catch (error) {
         console.log("Error in post message", error);
+        res.status(500).json({ msg: 'Internal server error', error })
+    }
+}
+
+exports.getProfile = async (req, res) => {
+    try {
+
+        const memberId = req.userId || req.agentId || req.adminId
+        const profile = await profileModel.findOne({ memberId: memberId })
+        if (!profile) return res.status(404).json({ msg: 'Profile not found for the member' })
+
+        res.status(200).json({ msg: 'Profile has been sended to the frontent', profile })
+
+    } catch (error) {
+        console.log('Error in getprofile', error);
         res.status(500).json({ msg: 'Internal server error', error })
     }
 }

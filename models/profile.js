@@ -2,13 +2,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema;
 
 const profileSchemaObj = new Schema({
-    adminId: {
-        type: Schema.Types.ObjectId,
-    },
-    agentId: {
-        type: Schema.Types.ObjectId,
-    },
-    userId: {
+    memberId: {
         type: Schema.Types.ObjectId,
     },
     role: {

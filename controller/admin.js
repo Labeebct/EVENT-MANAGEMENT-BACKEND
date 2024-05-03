@@ -1,4 +1,5 @@
 const signupModel = require('../models/signup')
+const usersSignupModel = require('../models/adminSignup')
 const messageModel = require('../models/messages')
 const categoryModel = require('../models/category')
 const { blockUser, unblockUser } = require('../utils/userBlockUnblock')
@@ -237,7 +238,22 @@ exports.postSortMessages = async (req, res) => {
         res.status(200).json({ msg: 'Messages has been send to the frontent', messages })
 
     } catch (error) {
-        console.log('Error in post sortmessages');
+        console.log('Error in post sortmessages', error);
+        res.status(500).json({ msg: 'Internal server error', error })
+    }
+}
+
+exports.getAdminDashboard = async (req, res) => {
+    try {
+
+        const usersCount = await usersSignupModel.countDocuments({})
+        const catagoryCount = await categoryModel.countDocuments({})
+
+        if (!usersCount || !catagoryCount) return res.status(404).json({ msg: 'Category or users are not found' })
+        res.status(200).json({ msg: 'Users count and category count has been send to the frontent', usersCount, catagoryCount })
+
+    } catch (error) {
+        console.log('Error in get admim dashboard', error);
         res.status(500).json({ msg: 'Internal server error', error })
     }
 }
