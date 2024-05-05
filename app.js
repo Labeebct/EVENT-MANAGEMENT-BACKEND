@@ -6,6 +6,7 @@ const app = express();
 
 const port = process.env.PORT
 const user = require('./routes/user');
+const agent = require('./routes/agent')
 const admin = require('./routes/admin')
 
 //Applying inbuilt middleware
@@ -16,6 +17,7 @@ app.use(express.static('public'));
 
 //Linking router    
 app.use('/api/admin',admin)  
+app.use('/api/agent',agent)
 app.use('/api/', user);
 
 //Connecting mongodb

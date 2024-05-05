@@ -7,6 +7,8 @@ const storage = multer.diskStorage({
       cb(null, './public/images/profile')
     } else if (file.fieldname == 'categoryImage') {
       cb(null, './public/images/category')
+    } else if (file.fieldname == 'venueImage') {
+      cb(null, './public/images/events')
     }
   },
   filename: (req, file, cb) => {
@@ -14,7 +16,6 @@ const storage = multer.diskStorage({
     cb(null, currentDate + '-' + file.originalname)
   }
 })
-
 
 const upload = multer({ storage: storage })
 module.exports = upload
