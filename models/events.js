@@ -11,6 +11,10 @@ const eventSchema = new schema({
         type: String,
         required: true
     },
+    category: {
+        type: String,
+        required: true
+    },
     eventImage: {
         type: String,
         required: true
@@ -59,6 +63,10 @@ const eventSchema = new schema({
         type: String,
         required: true
     },
-})
+    isBlocked:{     
+        type:Boolean,
+        default:false
+    }
+}, { timestamps: true })
 
 module.exports = mongoose.model('eventSchema', eventSchema)

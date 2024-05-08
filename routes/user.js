@@ -17,10 +17,12 @@ router.post('/forget-otp-verification/:email', userAuth.postForgetPasswordOtp)
 router.post('/reset-password', userAuth.postResetPassword)
 router.get('/resend-otp', userAuth.getResendOtp)
 router.post('/complete-profile', upload.single('profile'), commonController.postCompleteProfile)
-router.get('/profile', verifyToken, commonController.getProfile)
-router.post('/contact', verifyToken, commonController.postContactus)
+router.get('/profile', commonController.getProfile)
+router.get('/events',userController.getEventsList)
+router.post('/contact', commonController.postContactus)
 
 //ADMIN HOME
 router.get('/category',userController.getCategory)
+router.get('/view-event',userController.getViewEvent)
 
 module.exports = router;

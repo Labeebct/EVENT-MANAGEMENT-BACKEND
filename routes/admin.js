@@ -27,6 +27,7 @@ router.post('/edit-category', verifyToken, upload.single('categoryImage'), admin
 router.put('/category-block', verifyToken, adminController.putBlockCategory)
 router.get('/edit-category', verifyToken, adminController.getEditCategory)
 router.post('/sort-messages', verifyToken, adminController.postSortMessages)
+router.get('/events',adminController.getEventsList)
 router.get('/dashboard', verifyToken, adminController.getAdminDashboard)
 
 module.exports = router      

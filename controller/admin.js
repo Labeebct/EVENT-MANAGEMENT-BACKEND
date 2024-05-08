@@ -2,6 +2,7 @@ const signupModel = require('../models/signup')
 const usersSignupModel = require('../models/adminSignup')
 const messageModel = require('../models/messages')
 const categoryModel = require('../models/category')
+const eventsModel = require('../models/events')
 const { blockUser, unblockUser } = require('../utils/userBlockUnblock')
 
 exports.getUsersList = async (req, res) => {
@@ -255,5 +256,16 @@ exports.getAdminDashboard = async (req, res) => {
     } catch (error) {
         console.log('Error in get admim dashboard', error);
         res.status(500).json({ msg: 'Internal server error', error })
+    }
+}
+
+exports.getEventsList = async (req, res) => {
+    try {
+
+        const events = await eventsModel.find()
+        res.status(200).json({ msg: 'Events list has been sended to frontent', events })
+    } catch (error) {
+        console.log('Error in get events list', error);
+        res.status(500).json({ msg: 'Internal server error' })
     }
 }
