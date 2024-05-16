@@ -9,7 +9,7 @@ module.exports = (io) => {
 
         // create a function that add a new user object to Members array which has a userId and socketId
         socket.on('addMember', (memberId => {
-           console.log(memberId) 
+            console.log(memberId)
             const socketObj = {
                 socketId: socket.id,
                 memberId,
@@ -19,22 +19,38 @@ module.exports = (io) => {
             console.log(members);
         }))
 
-        socket.on('disconnect', ()=>{
+        socket.on('disconnect', () => {
             members = members.filter((user) => user.socketId !== socket.id)
         })
- 
+
         try {
             //For event booking 
-            socket.on('bookEvent', (booking) => {
-                bookingModel.create(booking).then((booking) => {
-                    const { agent } = booking
-                    const agentFound = members.find((members) => members.memberId == agent)
-                    if (agentFound) {
-                        const { socketId } = agentFound
-                        console.log('emitted');
-                        io.to(socketId).emit('fetchBooking', booking)
-                    }
-                })   
+            socket.on('bookEvent', async (booking) => {
+                const newData = new bookingModel(booking)
+                const bookedEvent = await newData.save()
+
+                const bookings = await bookingModel.aggregate([
+                    {
+                        $match: {
+                            _id: bookedEvent._id
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: "profiles",
+                            localField: "user",
+                            foreignField: "memberId",
+                            as: 'userProfile'
+                        }
+                    }   
+                ]);
+
+                const { agent } = bookedEvent
+                const agentFound = members.find((members) => members.memberId == agent)
+                if (agentFound) {
+                    const { socketId } = agentFound
+                    io.to(socketId).emit('fetchBooking', bookings)
+                }
             })
         } catch (error) {
             console.log('Error in book event', error);
