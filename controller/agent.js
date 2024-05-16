@@ -1,5 +1,5 @@
 const eventModel = require('../models/events')
-
+const bookingModel = require('../models/booking')
 
 exports.postAddEvents = async (req, res) => {
     try {
@@ -212,3 +212,30 @@ exports.putBlockCategory = async (req, res) => {
     }
 }
 
+exports.getMyBookings = async (req, res) => {
+    try {
+
+        const agentId = req.agentId
+
+        const bookings = await bookingModel.aggregate([
+            {
+                $match: { agent: agentId }
+            },
+            {
+                $lookup: {
+                    from: "profiles",
+                    localField: "agent",
+                    foreignField: "memberId",
+                    as: 'userProfile'
+                }
+            }
+        ]);
+
+        res.status(200).json({ msg: 'Bookings list has been sended to the frontent', bookings })
+
+    } catch (error) {
+        console.log('Error in get my booking', error);
+        res.status(500).json({ msg: 'Internal server error', error })
+    }
+}
+ 

@@ -1,5 +1,6 @@
 const signupModel = require('../models/signup')
 const usersSignupModel = require('../models/adminSignup')
+const bookingModel = require('../models/booking')
 const messageModel = require('../models/messages')
 const categoryModel = require('../models/category')
 const eventsModel = require('../models/events')
@@ -21,7 +22,7 @@ exports.getUsersList = async (req, res) => {
                 {
                     from: "profiles",
                     localField: "_id",
-                    foreignField: "userId",
+                    foreignField: "memberId",
                     as: 'profile'
                 }
             }])
@@ -51,7 +52,7 @@ exports.getAgentsList = async (req, res) => {
                 {
                     from: "profiles",
                     localField: "_id",
-                    foreignField: "userId",
+                    foreignField: "memberId",
                     as: 'profile'
                 }
             }])
@@ -249,9 +250,10 @@ exports.getAdminDashboard = async (req, res) => {
 
         const usersCount = await usersSignupModel.countDocuments({})
         const catagoryCount = await categoryModel.countDocuments({})
+        const eventsCount = await eventsModel.countDocuments({})
 
         if (!usersCount || !catagoryCount) return res.status(404).json({ msg: 'Category or users are not found' })
-        res.status(200).json({ msg: 'Users count and category count has been send to the frontent', usersCount, catagoryCount })
+        res.status(200).json({ msg: 'Users count and category count has been send to the frontent', usersCount, catagoryCount, eventsCount })
 
     } catch (error) {
         console.log('Error in get admim dashboard', error);
@@ -264,6 +266,36 @@ exports.getEventsList = async (req, res) => {
 
         const events = await eventsModel.find()
         res.status(200).json({ msg: 'Events list has been sended to frontent', events })
+    } catch (error) {
+        console.log('Error in get events list', error);
+        res.status(500).json({ msg: 'Internal server error' })
+    }
+}
+
+exports.getBookings = async (req, res) => {
+    try {
+
+
+        const bookings = await bookingModel.aggregate([
+            {
+                $lookup: {
+                    from: "profiles",
+                    localField: "user",
+                    foreignField: "memberId",
+                    as: 'userProfile'
+                }
+            },
+            {
+                $lookup: {
+                    from: "profiles",
+                    localField: "agent",
+                    foreignField: "memberId",
+                    as: 'agentProfile'
+                }
+            }
+        ]);
+
+        res.status(200).json({ msg: 'Bookings list has been sended to the frontent', bookings })
     } catch (error) {
         console.log('Error in get events list', error);
         res.status(500).json({ msg: 'Internal server error' })

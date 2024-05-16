@@ -18,9 +18,7 @@ exports.getEventsList = async (req, res) => {
 
         const { category } = req.query
 
-        const events = category ? await eventsModel.find({ category }) : await eventsModel.find()
-
-        console.log(events);
+        const events = category ? await eventsModel.find({ category,isBlocked:false }) : await eventsModel.find({isBlocked:false})
 
         res.status(200).json({ msg: 'Events list has been sended to frontent', events })
     } catch (error) {
@@ -28,10 +26,10 @@ exports.getEventsList = async (req, res) => {
         res.status(500).json({ msg: 'Internal server error' })
     }
 }
-
+ 
 exports.getViewEvent = async (req, res) => {
     try {
-
+            
         const { id } = req.query
 
         const event = await eventsModel.findById(id)

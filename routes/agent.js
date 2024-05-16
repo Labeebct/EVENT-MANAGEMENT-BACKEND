@@ -12,5 +12,6 @@ router.delete('/remove-available-dates',verifyToken,agentController.deleteRemove
 router.get('/edit-event',verifyToken,agentController.getEditEvents)
 router.get('/my-events',verifyToken,agentController.getMyEvents)
 router.put('/event-block',verifyToken,agentController.putBlockCategory)
+router.get('/my-bookings',verifyToken,agentController.getMyBookings)
 
 module.exports = router      
