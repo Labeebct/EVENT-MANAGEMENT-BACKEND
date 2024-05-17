@@ -1,4 +1,6 @@
 const bookingModel = require('../models/booking')
+const signupModel = require('../models/signup')
+const { eventCancell } = require('../utils/event')
 
 let members = []
 
@@ -24,7 +26,7 @@ module.exports = (io) => {
         })
 
         try {
-            //For event booking 
+            //For event booking      
             socket.on('bookEvent', async (booking) => {
                 const newData = new bookingModel(booking)
                 const bookedEvent = await newData.save()
@@ -42,7 +44,7 @@ module.exports = (io) => {
                             foreignField: "memberId",
                             as: 'userProfile'
                         }
-                    }   
+                    }
                 ]);
 
                 const { agent } = bookedEvent
@@ -52,6 +54,29 @@ module.exports = (io) => {
                     io.to(socketId).emit('fetchBooking', bookings)
                 }
             })
+
+            try {
+                //For cancel event
+                socket.on('cancelEvent', async (bookingId, userId) => {
+                    const cancellEvent = await bookingModel.findOneAndUpdate({ _id: bookingId }, { $set: { isCancelled: true } }, { new: true })
+                    if (cancellEvent.isCancelled) {
+                        const user = await signupModel.findById(userId)
+                        const { username, email } = user
+                        eventCancell(username, email)
+                    }
+                    //For cancell pending modal when event rejected
+                    const userFound = members.find((members) => members.memberId == userId)
+                    if (userFound) {
+                        const { socketId } = userFound
+                        socket.to(socketId).emit('eventCancelled', cancelled = true)
+                    }
+                })
+
+
+            } catch (error) {
+                console.log(error);
+            }
+
         } catch (error) {
             console.log('Error in book event', error);
         }
@@ -59,6 +84,3 @@ module.exports = (io) => {
     });
 
 }
-
-
-

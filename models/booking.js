@@ -4,11 +4,11 @@ const schema = mongoose.Schema
 const bookingSchema = new schema({
     orderId: {
         type: String,
-        default:null
+        default: null
     },
     currency: {
         type: String,
-        default:'INR'
+        default: 'INR'
     },
     amount: {
         type: Number,
@@ -38,8 +38,12 @@ const bookingSchema = new schema({
         type: Boolean,
         default: false
     },
+    isCancelled: {
+        type: Boolean,
+        default: false
+    },
     bookedDate: {
-        type: Date, 
+        type: Date,
         default: Date.now()
     }
 }, { timestamps: true })
