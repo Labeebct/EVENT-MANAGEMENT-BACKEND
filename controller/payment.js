@@ -8,10 +8,8 @@ const shortid = require("shortid");
 
 exports.postPayment = async (req, res) => {
 
-    const { advanceAmount, selectedDate, eventId } = req.body
-    const userId = req.userId
 
-    const findEvent = await eventModel.findById(eventId)
+    const { advanceAmount } = req.body
 
     // Initialize razorpay object
     const razorpay = new Razorpay({
@@ -32,20 +30,7 @@ exports.postPayment = async (req, res) => {
 
     try {
         const response = await razorpay.orders.create(options);
-        const booking = {
-            orderId: response.id,
-            currency: response.currency,
-            amount: response.amount,
-            event: findEvent,
-            selectedDate,
-            user: userId,
-            agent: findEvent.agentId,
-            isConfirmed: false,
-            bookedDate: new Date()
-        }
-
-        console.log(booking);
-        res.status(200).json(booking);
+        res.status(200).json({ orderId: response.id });
     } catch (err) {
         console.log(err);
         res.status(400).json(err);
@@ -56,14 +41,16 @@ exports.postPayment = async (req, res) => {
 exports.postPaymentCheck = async (req, res) => {
     try {
 
-        const { response, booking } = req.body
+        const { response, bookedEvent, orderId } = req.body
 
         let hmac = crypto.createHmac('sha256', process.env.KEY_SECRET)
         hmac.update(response.razorpay_order_id + '|' + response.razorpay_payment_id)
         hmac = hmac.digest('hex')
 
         if (hmac == response.razorpay_signature) {
-            await bookingModel.create(booking)
+            const { _id } = bookedEvent
+            const confirmBooking = await bookingModel.findOneAndUpdate({ _id }, { $set: { orderId, isPaymentDone: true } }, { new: true })
+            console.log(confirmBooking);
             res.status(200).json({ msg: 'Payment succesfully completed and booking placed', success: true })
         } else {
             res.status(276).json({ msg: 'Payment failed', success: false })

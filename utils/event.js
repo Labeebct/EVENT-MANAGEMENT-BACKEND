@@ -57,4 +57,56 @@ async function eventCancell(userName, userMail) {
     }
 }
 
-module.exports = { eventCancell }
+async function eventApproved(userName, userMail, venueName, selectedDate, advanceAmount) {
+
+    try {
+        await transporter.sendMail({
+            from: sendingEmail,
+            to: userMail,
+            subject: "Your event booking has been rejected.",
+            html: `
+            <p>
+            Dear ${userName.toUpperCase()},
+        </p>
+    <p>
+        We are pleased to inform you that your event booking has been successfully approved.
+    </p>
+    <p>
+        After reviewing your request, we have confirmed the availability of the selected date and venue. We are excited to accommodate your event and look forward to making it a memorable experience for you and your guests.
+    </p>
+    <p>
+        Please find the details of your booking below:
+    </p>
+    <ul>
+        <li><strong>Venue:</strong> ${venueName.toUpperCase()}</li>
+        <li><strong>Date:</strong> ${selectedDate}</li>
+        <li><strong>Advance:</strong> ₹${advanceAmount}</li>
+    </ul>
+    <p>
+        To secure your booking, please proceed with the payment of the advance amount. You can make the payment through our online payment portal or by contacting our support team for alternative payment methods. Once the payment is received, we will send you a confirmation receipt.
+    </p>
+    <p>
+        If you need to make any changes to your booking or have any special requirements, please do not hesitate to contact our support team. We are here to assist you with any questions or additional arrangements you may need.
+    </p>
+    <p>
+        We are committed to providing you with the best possible service and support. Should you require any further assistance, please feel free to reach out to us at any time.
+    </p>
+    <p>
+        Thank you for choosing our services. We look forward to hosting your event.
+    </p>
+    <p>
+        Best regards,<br>
+        Labeeb CT<br>
+        LABIO Support Team
+    </p>
+        `
+        });
+
+
+
+    } catch (error) {
+        console.log('Error in nodemailer', error.message);
+    }
+}
+
+module.exports = { eventCancell, eventApproved }
