@@ -51,7 +51,7 @@ exports.postPaymentCheck = async (req, res) => {
             const { _id } = bookedEvent
             const confirmBooking = await bookingModel.findOneAndUpdate({ _id }, { $set: { orderId, isPaymentDone: true } }, { new: true })
             console.log(confirmBooking);
-            res.status(200).json({ msg: 'Payment succesfully completed and booking placed', success: true })
+            res.status(200).json({ msg: 'Payment succesfully completed and booking placed', success: true, bookedEvent })
         } else {
             res.status(276).json({ msg: 'Payment failed', success: false })
         }

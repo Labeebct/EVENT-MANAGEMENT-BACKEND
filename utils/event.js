@@ -19,7 +19,7 @@ async function eventCancell(userName, userMail) {
         await transporter.sendMail({
             from: sendingEmail,
             to: userMail,
-            subject: "Your event booking has been rejected.",
+            subject: "Your Event booking has been Rejected.",
             html: `
             <p>
             Dear ${userName.toUpperCase()},
@@ -63,7 +63,7 @@ async function eventApproved(userName, userMail, venueName, selectedDate, advanc
         await transporter.sendMail({
             from: sendingEmail,
             to: userMail,
-            subject: "Your event booking has been rejected.",
+            subject: "Your Event booking has been Approved.",
             html: `
             <p>
             Dear ${userName.toUpperCase()},

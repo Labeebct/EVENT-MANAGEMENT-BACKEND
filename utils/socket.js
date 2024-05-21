@@ -1,17 +1,21 @@
 const bookingModel = require('../models/booking')
+const eventModel = require('../models/events')
 const signupModel = require('../models/signup')
+const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
 const { eventCancell, eventApproved } = require('../utils/event')
+const { bookingCompleteUser, bookingCompleteAgent } = require('../utils/bookingComplete')
 
 let members = []
 
 module.exports = (io) => {
 
     io.on('connection', (socket) => {
+
         console.log('Socket connected success');
 
         // create a function that add a new user object to Members array which has a userId and socketId
         socket.on('addMember', (memberId => {
-            console.log(memberId)
             const socketObj = {
                 socketId: socket.id,
                 memberId,
@@ -69,7 +73,7 @@ module.exports = (io) => {
                         const { socketId } = userFound
                         socket.to(socketId).emit('eventCancelled')
                     }
-                })    
+                })
 
             } catch (error) {
                 console.log(error);
@@ -77,7 +81,7 @@ module.exports = (io) => {
 
 
             try {
-      
+
                 //For approve event booking
                 socket.on('approveEvent', async (bookingId, userId) => {
                     const approveEvent = await bookingModel.findOneAndUpdate({ _id: bookingId }, { $set: { isConfirmed: true } }, { new: true })
@@ -90,7 +94,7 @@ module.exports = (io) => {
                     const userFound = members.find((members) => members.memberId == userId)
                     if (userFound) {
                         const { socketId } = userFound
-                        socket.to(socketId).emit('eventApproved',approveEvent)
+                        socket.to(socketId).emit('eventApproved', approveEvent)
                     }
                 })
 
@@ -98,6 +102,67 @@ module.exports = (io) => {
                 console.log(error);
             }
 
+            try {
+
+                //For emailing after event completed
+                socket.on('BOOKING_COMPLETED', async (bookedEvent) => {
+
+                    //Emailing agent details to the user
+                    const userId = bookedEvent.user
+                    const agentId = bookedEvent.agent
+                    const selectedDate = bookedEvent.selectedDate
+                    const eventId = bookedEvent?.event?._id
+
+                    const date = new Date(selectedDate);
+                    const formatedDate = date.toString();
+
+                    const findEvent = await eventModel.findById(eventId)
+                    const availableDate = findEvent.availableDates
+
+                    const newAvailableDate = availableDate.filter((date) => date !== formatedDate)
+                    await eventModel.findOneAndUpdate({ _id: eventId }, { $set: { availableDates: newAvailableDate } }, { new: true })
+
+                    const agentDetails = await signupModel.aggregate([
+                        {
+                            $match: {
+                                _id: new ObjectId(agentId)
+                            }
+                        },
+                        {
+                            $lookup:
+                            {
+                                from: "profiles",
+                                localField: "_id",
+                                foreignField: "memberId",
+                                as: 'profile'
+                            }
+                        }])
+
+                    const userDetails = await signupModel.aggregate([
+                        {
+                            $match: {
+                                _id: new ObjectId(userId)
+                            }
+                        },
+                        {
+                            $lookup:
+                            {
+                                from: "profiles",
+                                localField: "_id",
+                                foreignField: "memberId",
+                                as: 'profile'
+                            }
+                        }])
+
+                    bookingCompleteUser(bookedEvent, userDetails, agentDetails)
+                    bookingCompleteAgent(bookedEvent, agentDetails, userDetails)
+
+                })
+
+            } catch (error) {
+                console.log(error);
+            }
+            
         } catch (error) {
             console.log('Error in book event', error);
         }

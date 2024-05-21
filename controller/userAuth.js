@@ -148,14 +148,15 @@ exports.postLogin = async (req, res) => {
                         const payload = {
                             userId: userExist._id,
                             username: userExist.username,
+                            email: userExist.email,
                             role: userExist.role
                         }
                         const token = jwt.sign(payload, process.env.JWT_SECRET);
 
                         const profileExist = await profileModel.findOne({ email })
-                        if (!profileExist) return res.status(202).json({ msg: 'Login Success', userExist, role:userExist.role })
-                        res.status(200).json({ msg: 'Login Success', token , role:userExist.role})
-                    
+                        if (!profileExist) return res.status(202).json({ msg: 'Login Success', userExist, role: userExist.role })
+                        res.status(200).json({ msg: 'Login Success', token, role: userExist.role })
+
                     } else {
                         return res.status(401).json({ msg: 'Incorrect Password' })
                     }
