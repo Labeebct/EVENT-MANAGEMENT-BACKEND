@@ -30,5 +30,6 @@ router.post('/sort-messages', verifyToken, adminController.postSortMessages)
 router.get('/events',verifyToken,adminController.getEventsList)
 router.get('/dashboard', verifyToken, adminController.getAdminDashboard)
 router.get('/bookings', verifyToken, adminController.getBookings)
+router.get('/booking_chart',verifyToken,adminController.getBookingChart)
 
 module.exports = router      

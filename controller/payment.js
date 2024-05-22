@@ -25,7 +25,7 @@ exports.postPayment = async (req, res) => {
         amount: (amount * 100).toString(),
         currency,
         receipt: shortid.generate(),
-        payment_capture,
+        payment_capture,    
     };
 
     try {

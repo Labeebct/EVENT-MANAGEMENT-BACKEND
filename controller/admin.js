@@ -301,3 +301,26 @@ exports.getBookings = async (req, res) => {
         res.status(500).json({ msg: 'Internal server error' })
     }
 }
+
+exports.getBookingChart = async (req, res) => {
+    try {
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+        const bookings = await bookingModel.find({
+            bookedDate: { $gte: oneWeekAgo },
+        });
+
+        if (bookings) {
+            const chartData = bookings.map(booking => ({
+                bookedDate: booking.bookedDate,
+                amount: booking.amount,
+            }));
+            return res.status(200).json({ chartData });
+        }
+    } catch (error) {
+        console.log('Error in get events list', error);
+        res.status(500).json({ msg: 'Internal server error' });
+    }
+
+}
