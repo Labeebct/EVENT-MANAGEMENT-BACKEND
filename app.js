@@ -24,10 +24,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static('public'));
 
 //Linking router    
-app.use('/api/admin', admin)
-app.use('/api/agent', agent)
-app.use('/api/', user);
- 
+app.use('/admin', admin)
+app.use('/agent', agent)
+app.use('/', user);
+
 connectSocket(io)
 
 //Connecting mongodb
